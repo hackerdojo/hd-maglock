@@ -6,7 +6,10 @@ from twisted.web        import client as http, error as http_error
 from twisted.protocol   import basic
 
 class RelayProtocol(basic.LineReceiver):
-    pass
+    # Here's an echo implementation to show you read/write
+    def lineReceived(self, line):
+        self.sendLine(self, line)
+        
 
 if __name__ == "__main__":
     log.startLogging(sys.stdout)
