@@ -4,6 +4,9 @@ import urllib
 import json
 import sys
 
+from keys import maglock_key
+
+
 def fatal(msg,err):
   print "\n"
   print "[ERROR] " + str(msg)
@@ -11,7 +14,7 @@ def fatal(msg,err):
   sys.exit(0)
 
 try:
-  userURL = urllib.urlopen('http://signup.hackerdojo.com/api/rfid')
+  userURL = urllib.urlopen('http://signup.hackerdojo.com/api/rfid?maglock:key='+maglock_key)
   data = userURL.read()
   userURL.close()
 except:
