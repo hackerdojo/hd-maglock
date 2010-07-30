@@ -5,8 +5,11 @@ import json
 import sys
 import os
 
+# This program runs from /etc/rc and takes keyboard input. 
+
 serialport = '/dev/cuau0'
 relayfile = None
+seconds_to_keep_door_open = 6
   
 def relayOn():
   print '[RELAYON] The door is now locked'
@@ -40,7 +43,7 @@ def fatal(msg,err):
   sys.exit(0)
 
 def main():
-  print "\nHacker Dojo RFID Entry System v0.2\n"
+  print "\nHacker Dojo RFID Entry System v0.221\n"
   if os.path.exists(serialport):
     relayfile = serial.Serial(serialport, baudrate=9600)
   else:
@@ -48,6 +51,11 @@ def main():
   relayOn() # Lock the door to start ;)
   while True:
     scanLoop()
+
+def openTheDoor():
+  relayOff()
+  time.sleep(seconds_to_keep_door_open)
+  relayOn()
 
 def scanLoop():
   key = raw_input('RFID> ').strip()
@@ -64,9 +72,7 @@ def scanLoop():
           foundUser = user
     if foundUser:
       print '[FOUND] ' + foundUser['username']
-      relayOff()
-      time.sleep(3)
-      relayOn()
+      openTheDoor()
       foundUser = None
     else:
       print '[NOTFOUND] Sorry, RFID key not found'

@@ -4,6 +4,8 @@ import urllib
 import json
 import sys
 
+# This program runs from a cronjob every 5 minutes
+
 def fatal(msg,err):
   print "\n"
   print "[ERROR] " + str(msg)
