@@ -6,6 +6,8 @@ import sys
 
 # This program runs from a cronjob every 5 minutes
 
+from keys import maglock_key
+
 def fatal(msg,err):
   print "\n"
   print "[ERROR] " + str(msg)
@@ -14,7 +16,7 @@ def fatal(msg,err):
 
 def main():
   try:
-    userURL = urllib.urlopen('http://signup.hackerdojo.com/api/rfid')
+    userURL = urllib.urlopen('http://signup.hackerdojo.com/api/rfid?maglock:key='+maglock_key)
     data = userURL.read()
     userURL.close()
   except:
