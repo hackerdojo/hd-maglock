@@ -3,17 +3,20 @@ import time
 import urllib
 import json
 import sys
+import os
 
-relayfile = serial.Serial('/dev/cuau0', baudrate=9600)
-print "\nHacker Dojo RFID Entry System v0.2\n"
-
+serialport = '/dev/cuau0'
+relayfile = None
+  
 def relayOn():
-  print '[RELAY] On'
-  relayfile.setDTR(True)
+  print '[RELAYON] The door is now locked'
+  if relayfile:
+    relayfile.setDTR(True)
 
 def relayOff():
-  print '[RELAY] Off'
-  relayfile.setDTR(False)
+  print '[RELAYOFF] The door is now unlocked'
+  if relayfile:
+    relayfile.setDTR(False)
 
 def getUsers():
   try:
@@ -36,7 +39,17 @@ def fatal(msg,err):
   print "[ERROR] " + str(err)
   sys.exit(0)
 
-while True:
+def main():
+  print "\nHacker Dojo RFID Entry System v0.2\n"
+  if os.path.exists(serialport):
+    relayfile = serial.Serial(serialport, baudrate=9600)
+  else:
+    print "WARNING: Serial port not found! Program will operate in 'pretend' mode.\n"
+  relayOn() # Lock the door to start ;)
+  while True:
+    scanLoop()
+
+def scanLoop():
   key = raw_input('RFID> ').strip()
   if key in ["exit","exit()","quit","quit()"]:
     print "[EXIT] Exiting"
@@ -44,7 +57,7 @@ while True:
   if key:
     print "[DEBUG] I just scanned " + key
     userData = getUsers()
-    print "[DEBUG] Comparing to " + str(len(userData)) + " RFIDs"
+    print "[DEBUG] Comparing to " + str(len(userData)) + " RFIDs..."
     foundUser = None
     for user in userData:
        if key == user['rfid_tag']:
@@ -58,4 +71,4 @@ while True:
     else:
       print '[NOTFOUND] Sorry, RFID key not found'
       
-      
+main()
