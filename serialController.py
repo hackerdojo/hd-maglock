@@ -7,7 +7,7 @@ import os
 
 # This program runs from /etc/rc and takes keyboard input. 
 
-serialport = '/dev/cuau0'
+serialport = '/dev/cuau1'
 relayfile = None
 seconds_to_keep_door_open = 6
   
@@ -43,6 +43,7 @@ def fatal(msg,err):
   sys.exit(0)
 
 def main():
+  global relayfile
   print "\nHacker Dojo RFID Entry System v0.221\n"
   if os.path.exists(serialport):
     relayfile = serial.Serial(serialport, baudrate=9600)
