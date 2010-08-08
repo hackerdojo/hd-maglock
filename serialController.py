@@ -4,12 +4,15 @@ import urllib
 import json
 import sys
 import os
+import random
+import datetime
 
 # This program runs from /etc/rc and takes keyboard input. 
 
 serialport = '/dev/cuau1'
 relayfile = None
 seconds_to_keep_door_open = 6
+spooldir = '/root/unlock_spool'
   
 def relayOn():
   print '[RELAYON] The door is now locked'
@@ -34,6 +37,8 @@ def getUsers():
     fatal("Unable to parse JSON",sys.exc_info()[0])
   if len(userData) < 1:
     fatal("Number of RFID tags too small")
+  userData.append({"rfid_tag":"0001890155","username":"cleaners"})
+  userData.append({"rfid_tag":"0001691797","username":"brian.klug"})
   return userData
 
 def fatal(msg,err):
@@ -52,6 +57,13 @@ def main():
   relayOn() # Lock the door to start ;)
   while True:
     scanLoop()
+
+def logOpen(data):
+  rndfile = ''.join([random.choice('abcdefghijklmnoprstuvwyxzABCDEFGHIJKLMNOPRSTUVWXYZ') for i in range(15)])
+  f = open(spooldir+"/"+rndfile, 'w')
+  data['time'] = datetime.datetime.now().isoformat()
+  f.write(json.dumps(data))
+  f.close()
 
 def openTheDoor():
   relayOff()
@@ -74,6 +86,7 @@ def scanLoop():
     if foundUser:
       print '[FOUND] ' + foundUser['username']
       openTheDoor()
+      logOpen(foundUser)
       foundUser = None
     else:
       print '[NOTFOUND] Sorry, RFID key not found'
