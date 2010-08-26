@@ -38,6 +38,7 @@ def getUsers():
   if len(userData) < 1:
     fatal("Number of RFID tags too small")
   userData.append({"rfid_tag":"0001890155","username":"cleaners"})
+  userData.append({"rfid_tag":"0001816397","username":"benchmark.construction"})
   userData.append({"rfid_tag":"0001691797","username":"brian.klug"})
   return userData
 
