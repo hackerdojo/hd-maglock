@@ -1,0 +1,10 @@
+#!/bin/sh
+
+CONS=/dev/ttyv0
+
+while true
+do
+	/usr/local/bin/python \
+		/root/Serial-Relay-Controller/serialController.py \
+		> $CONS < $CONS
+done

@@ -1,0 +1,6 @@
+#!/bin/sh
+#
+#
+# If this does not enter the background you won't be able to log in!
+# Alter with care!
+/root/maglock_ttyv1.sh &
