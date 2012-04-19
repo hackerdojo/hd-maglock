@@ -6,6 +6,7 @@ import sys
 import os
 import random
 import datetime
+import signal
 
 # This program runs from /etc/rc and takes keyboard input. 
 
@@ -13,7 +14,21 @@ serialport = '/dev/cuau1'
 relayfile = None
 seconds_to_keep_door_open = 6
 spooldir = '/root/unlock_spool'
+day = False
   
+def interrupted(signum, frame):
+  global day
+  print '[interrupted!] '
+  if signum == 14: #ALRM
+    print "[DAYTIME] Unlocking for day-time hours"
+    day = True
+    relayOff()
+  if signum == 2: #INT
+    print "[NIGHT] Locking up for after-hours"
+    day = False
+    relayOn()
+  
+      
 def relayOn():
   print '[RELAYON] The door is now locked <red>'
   if relayfile:
@@ -80,11 +95,23 @@ def openTheDoor():
   relayOn()
 
 def scanLoop():
-  key = raw_input('RFID> ').strip()
+  global day
+  signal.signal(signal.SIGALRM, interrupted)
+  signal.signal(signal.SIGINT, interrupted)
+  if day:
+    mode = "day"
+  else:
+    mode = "night"
+  try:
+    key = raw_input('RFID ('+mode+')> ').strip()
+  except:
+    print ""
+    key = ""
   if key in ["exit","exit()","quit","quit()"]:
     print "[EXIT] Exiting"
     sys.exit(0)  
-  if key:
+  # Only look at keys during the night
+  if not day and key:
     print "[DEBUG] I just scanned " + key
     userData = getUsers()
     print "[DEBUG] Comparing to " + str(len(userData)) + " RFIDs..."
