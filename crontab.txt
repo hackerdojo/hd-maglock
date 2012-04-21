@@ -4,16 +4,11 @@
 # Update the system clock once a day at 5:05AM
 5 5 * * * /usr/sbin/ntpdate pool.ntp.org > /dev/null &> /dev/null
 
-# Unlock the door weekdays 8:00AM
-0 8 * * Mon,Tue,Wed,Thu,Fri /usr/bin/killall -ALRM python
+# Unlock the door daily at 8:00AM
+0 8 * * * /usr/bin/killall -ALRM python
 
-# Lock the door weekdays 10:01PM
-1 22 * * Mon,Tue,Wed,Thu,Fri /usr/bin/killall -INT python
+# Lock the door daily at 10:01PM
+1 22 * * * /usr/bin/killall -INT python
 
 # Lock or unlock the door if an event is starting/ending right now(), during weekdays off hours
-0,15,30,45 0,1,2,3,4,5,6,7,22,23 * * Mon,Tue,Wed,Thu,Fri /usr/local/bin/python /root/Serial-Relay-Controller/event.py
-
-# Lock or unlock the door if an event is starting/ending right now() during the weekends
-0,15,30,45 * * * Sat,Sun /usr/local/bin/python /root/Serial-Relay-Controller/event.py
-
-
+0,15,30,45 0,1,2,3,4,5,6,7,22,23 * * * /usr/local/bin/python /root/Serial-Relay-Controller/event.py
