@@ -20,3 +20,5 @@ iface wlan0 inet static
         network 10.15.0.0
         broadcast 10.15.3.255
         gateway 10.15.0.1
+        pre-up wpa_supplicant -B -iwlan0 -c/etc/wpa_supplicant.conf
+        post-down killall -q wpa_supplicant
