@@ -28,7 +28,7 @@ def main():
   if len(userData) < 1:
     fatal("Number of RFID tags too small")
   try:
-    FILE = open("/tmp/rfid","w")
+    FILE = open("/root/rfid.keys","w")
     FILE.writelines(data)
     FILE.close()
   except:

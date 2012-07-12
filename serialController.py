@@ -10,7 +10,7 @@ import signal
 
 # This program runs from /etc/rc and takes keyboard input. 
 
-serialport = '/dev/cuau1'
+serialport = '/dev/ttyUSB0'
 relayfile = None
 seconds_to_keep_door_open = 6
 spooldir = '/root/unlock_spool'
@@ -49,7 +49,7 @@ def relayOff():
 
 def getUsers():
   try:
-    userURL = urllib.urlopen('/tmp/rfid')
+    userURL = urllib.urlopen('/root/rfid.keys')
     data = userURL.read()
     userURL.close()
   except:
