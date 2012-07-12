@@ -33,19 +33,19 @@ def relayOn():
   print '[RELAYON] The door is now locked <red>'
   if relayfile:
     relayfile.setDTR(True)
-  try:
-    urllib.urlopen("http://10.15.0.17/red")
-  except:
-    print "Unexpected error:", sys.exc_info()[0]
+  #try:
+  # urllib.urlopen("http://10.15.0.17/red")
+  #except:
+  #  print "Unexpected error:", sys.exc_info()[0]
 
 def relayOff():
   print '[RELAYOFF] The door is now unlocked <white>'
   if relayfile:
     relayfile.setDTR(False)
-  try:
-    urllib.urlopen("http://10.15.0.17/white")
-  except:
-    print "Unexpected error:", sys.exc_info()[0]
+  #try:
+  #  urllib.urlopen("http://10.15.0.17/white")
+  #except:
+  #  print "Unexpected error:", sys.exc_info()[0]
 
 def getUsers():
   try:
