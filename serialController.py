@@ -86,7 +86,9 @@ def checkDoorOpen():
         # Door has been open for 2 minutes, sound alarm:
         print 'Door has been open too long!'
         call(["mpg123-alsa", "/usr/local/lib/money.mp3"])
-    threading.Timer(60, checkDoorOpen).start()
+        threading.Timer(10, checkDoorOpen).start()
+      else:
+        threading.Timer(20, checkDoorOpen).start()
   else:
     return False
 
