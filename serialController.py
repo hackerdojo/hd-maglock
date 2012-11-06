@@ -7,6 +7,17 @@ import os
 import random
 import datetime
 import signal
+import time
+from subprocess import call
+import threading
+
+# Use of the velleman-vm110n board assumes that our sensor pin is using
+# digital input 1 and the maglock on digital output 1
+velleman = True
+
+if velleman:
+  from pyk8055 import *
+  velleman = k8055(0)
 
 # This program runs from /etc/rc and takes keyboard input. 
 
@@ -15,6 +26,7 @@ relayfile = None
 seconds_to_keep_door_open = 6
 spooldir = '/root/unlock_spool'
 day = False
+doorOpenAt = int(time.time())
   
 def interrupted(signum, frame):
   global day
@@ -27,25 +39,54 @@ def interrupted(signum, frame):
     print "[NIGHT] Locking up for after-hours"
     day = False
     relayOn()
-  
-      
+
 def relayOn():
   print '[RELAYON] The door is now locked <red>'
-  if relayfile:
-    relayfile.setDTR(True)
-  #try:
-  # urllib.urlopen("http://10.15.0.17/red")
-  #except:
-  #  print "Unexpected error:", sys.exc_info()[0]
+  if velleman:
+    # This will make digital output 1 HIGH
+    velleman.WriteAllDigital(1)
+  else:
+    if relayfile:
+      relayfile.setDTR(True)
+    #try:
+    # urllib.urlopen("http://10.15.0.17/red")
+    #except:
+    #  print "Unexpected error:", sys.exc_info()[0]
 
 def relayOff():
   print '[RELAYOFF] The door is now unlocked <white>'
-  if relayfile:
-    relayfile.setDTR(False)
-  #try:
-  #  urllib.urlopen("http://10.15.0.17/white")
-  #except:
-  #  print "Unexpected error:", sys.exc_info()[0]
+  if velleman:
+    # This will make digital output 1 LOW
+    velleman.WriteAllDigital(0)
+  else:
+    if relayfile:
+      relayfile.setDTR(False)
+    #try:
+    #  urllib.urlopen("http://10.15.0.17/white")
+    #except:
+    #  print "Unexpected error:", sys.exc_info()[0]
+
+# This function will execute once every 60 seconds
+# to check if the door is open or not.  If the door
+# stays open for more than 2 minutes, it will sound
+# the alarm
+def checkDoorOpen():
+  now = int(time.time())
+  if velleman:
+    if velleman.ReadDigitalChannel(1) == 1:
+      # door is closed
+      doorOpenAt = False
+    else:
+      if not doorOpenAt:
+        doorOpenAt = now
+      if (now - doorOpenAt) > 120:
+        # Door has been open for 2 minutes, sound alarm:
+        # call(["alsaplayer", "alarm.wav"])
+    threading.Timer(60, checkDoorOpen).start()
+  else:
+    return False
+
+checkDoorOpen()
 
 def getUsers():
   try:
