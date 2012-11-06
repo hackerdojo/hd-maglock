@@ -81,7 +81,7 @@ def checkDoorOpen():
         doorOpenAt = now
       if (now - doorOpenAt) > 120:
         # Door has been open for 2 minutes, sound alarm:
-        # call(["alsaplayer", "alarm.wav"])
+        call(["mpg123-alsa", "/usr/local/lib/money.mp3"])
     threading.Timer(60, checkDoorOpen).start()
   else:
     return False
