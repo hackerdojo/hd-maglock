@@ -71,16 +71,20 @@ def relayOff():
 # stays open for more than 2 minutes, it will sound
 # the alarm
 def checkDoorOpen():
+  global doorOpenAt
   now = int(time.time())
   if velleman:
     if velleman.ReadDigitalChannel(1) == 1:
       # door is closed
+      print 'Door is closed'
       doorOpenAt = False
     else:
+      print 'Door is open'
       if not doorOpenAt:
         doorOpenAt = now
       if (now - doorOpenAt) > 120:
         # Door has been open for 2 minutes, sound alarm:
+        print 'Door has been open too long!'
         call(["mpg123-alsa", "/usr/local/lib/money.mp3"])
     threading.Timer(60, checkDoorOpen).start()
   else:
