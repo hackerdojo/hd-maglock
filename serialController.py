@@ -19,7 +19,7 @@ if velleman:
   from pyk8055 import *
   velleman = k8055(0)
 
-# This program runs from /etc/rc and takes keyboard input. 
+# This program runs from /etc/rc and takes keyboard input.
 
 serialport = '/dev/ttyUSB0'
 relayfile = None
@@ -27,7 +27,7 @@ seconds_to_keep_door_open = 6
 spooldir = '/root/unlock_spool'
 day = False
 doorOpenAt = int(time.time())
-  
+
 def interrupted(signum, frame):
   global day
   print '[interrupted!] '
@@ -44,7 +44,7 @@ def relayOn():
   print '[RELAYON] The door is now locked <red>'
   if velleman:
     # This will make digital output 1 HIGH
-    velleman.WriteAllDigital(1)
+    velleman.WriteAllDigital(0)
   else:
     if relayfile:
       relayfile.setDTR(True)
@@ -57,7 +57,7 @@ def relayOff():
   print '[RELAYOFF] The door is now unlocked <white>'
   if velleman:
     # This will make digital output 1 LOW
-    velleman.WriteAllDigital(0)
+    velleman.WriteAllDigital(1)
   else:
     if relayfile:
       relayfile.setDTR(False)
@@ -156,7 +156,7 @@ def scanLoop():
     key = ""
   if key in ["exit","exit()","quit","quit()"]:
     print "[EXIT] Exiting"
-    sys.exit(0)  
+    sys.exit(0)
   # Only look at keys during the night
   if not day and key:
     print "[DEBUG] I just scanned " + key
@@ -173,5 +173,5 @@ def scanLoop():
       foundUser = None
     else:
       print '[NOTFOUND] Sorry, RFID key not found'
-      
+
 main()
