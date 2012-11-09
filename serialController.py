@@ -90,10 +90,11 @@ def checkDoorOpen():
           print 'Door has been open too long!'
           audioPlayTime = now
           call(["mpg123-alsa", "/usr/local/lib/pleaseclose.mp3"])
+    threading.Timer(1, checkDoorOpen).start()
   else:
     return False
 
-threading.Timer(1, checkDoorOpen).start()
+checkDoorOpen()
 
 def getUsers():
   try:
