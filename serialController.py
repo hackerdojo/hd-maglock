@@ -79,7 +79,7 @@ def checkDoorOpen():
     if velleman.ReadDigitalChannel(1) == 1:
       # door is closed
       print 'Door is closed'
-      if not doorOpenAt:
+      if doorOpenAt:
         call(["killall", "mpg123-alsa"])
       doorOpenAt = False
     else:
