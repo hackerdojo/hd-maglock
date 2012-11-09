@@ -26,7 +26,7 @@ relayfile = None
 seconds_to_keep_door_open = 6
 spooldir = '/root/unlock_spool'
 day = False
-doorOpenAt = int(time.time())
+doorOpenAt = False
 audioPlayTime = int(time.time())
 
 def interrupted(signum, frame):
@@ -77,28 +77,23 @@ def checkDoorOpen():
   now = int(time.time())
   if velleman:
     if velleman.ReadDigitalChannel(1) == 1:
-      # door is closed
-      print 'Door is closed'
       if doorOpenAt:
+        print "door is closed"
         call(["killall", "mpg123-alsa"])
       doorOpenAt = False
     else:
-      print 'Door is open'
       if not doorOpenAt:
         doorOpenAt = now
       if (now - doorOpenAt) > 20:
         # Door has been open for 2 minutes, sound alarm:
-        print 'Door has been open too long!'
         if (now - audioPlayTime) > 10:
+          print 'Door has been open too long!'
           audioPlayTime = now
-          call(["mpg123-alsa", "/usr/local/lib/money.mp3"])
-        threading.Timer(1, checkDoorOpen).start()
-      else:
-        threading.Timer(20, checkDoorOpen).start()
+          call(["mpg123-alsa", "/usr/local/lib/pleaseclose.mp3"])
   else:
     return False
 
-checkDoorOpen()
+threading.Timer(1, checkDoorOpen).start()
 
 def getUsers():
   try:
