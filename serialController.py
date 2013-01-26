@@ -13,7 +13,9 @@ import threading
 
 # Use of the velleman-vm110n board assumes that our sensor pin is using
 # digital input 1 and the maglock on digital output 1
-velleman = True
+velleman = False
+serialrelay = False
+insteon = True
 
 if velleman:
   from pyk8055 import *
@@ -26,7 +28,8 @@ relayfile = None
 seconds_to_keep_door_open = 6
 spooldir = '/root/unlock_spool'
 day = False
-doorOpenAt = int(time.time())
+doorOpenAt = False
+audioPlayTime = int(time.time())
 
 def interrupted(signum, frame):
   global day
@@ -42,12 +45,15 @@ def interrupted(signum, frame):
 
 def relayOn():
   print '[RELAYON] The door is now locked <red>'
+  if insteon:
+    os.system("insteon lobbyright off")
   if velleman:
     # This will make digital output 1 HIGH
     velleman.WriteAllDigital(0)
-  else:
+  if serialrelay:
     if relayfile:
       relayfile.setDTR(True)
+      relayfile.setRTS(True)
     #try:
     # urllib.urlopen("http://10.15.0.17/red")
     #except:
@@ -55,12 +61,15 @@ def relayOn():
 
 def relayOff():
   print '[RELAYOFF] The door is now unlocked <white>'
+  if insteon:
+    os.system("insteon lobbyright on")
   if velleman:
     # This will make digital output 1 LOW
     velleman.WriteAllDigital(1)
-  else:
+  if serialrelay:
     if relayfile:
       relayfile.setDTR(False)
+      relayfile.setRTS(False)
     #try:
     #  urllib.urlopen("http://10.15.0.17/white")
     #except:
@@ -72,23 +81,24 @@ def relayOff():
 # the alarm
 def checkDoorOpen():
   global doorOpenAt
+  global audioPlayTime
   now = int(time.time())
   if velleman:
     if velleman.ReadDigitalChannel(1) == 1:
-      # door is closed
-      print 'Door is closed'
+      if doorOpenAt:
+        print "door is closed"
+        call(["killall", "mpg123-alsa"])
       doorOpenAt = False
     else:
-      print 'Door is open'
       if not doorOpenAt:
         doorOpenAt = now
-      if (now - doorOpenAt) > 120:
-        # Door has been open for 2 minutes, sound alarm:
-        print 'Door has been open too long!'
-        call(["mpg123-alsa", "/usr/local/lib/money.mp3"])
-        threading.Timer(10, checkDoorOpen).start()
-      else:
-        threading.Timer(20, checkDoorOpen).start()
+      #if (now - doorOpenAt) > 20:
+      #  # Door has been open for 2 minutes, sound alarm:
+      #  if (now - audioPlayTime) > 10:
+      #    print 'Door has been open too long!'
+      #    audioPlayTime = now
+      #    call(["mpg123-alsa", "/usr/local/lib/pleaseclose.mp3"])
+    threading.Timer(1, checkDoorOpen).start()
   else:
     return False
 
@@ -121,10 +131,8 @@ def fatal(msg,err):
 def main():
   global relayfile
   print "\nHacker Dojo RFID Entry System v0.221\n"
-  if os.path.exists(serialport):
+  if serialrelay:
     relayfile = serial.Serial(serialport, baudrate=9600)
-  else:
-    print "WARNING: Serial port not found! Program will operate in 'pretend' mode.\n"
   relayOn() # Lock the door to start ;)
   while True:
     scanLoop()
