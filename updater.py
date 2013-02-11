@@ -16,7 +16,8 @@ def fatal(msg,err):
 
 def main():
   try:
-    userURL = urllib.urlopen('http://signup.hackerdojo.com/api/rfid?machine=599main&maglock:key='+maglock_key)
+    #userURL = urllib.urlopen('http://signup.hackerdojo.com/api/rfid?machine=599main&maglock:key='+maglock_key)
+    userURL = urllib.urlopen('http://signup.hackerdojo.com/api/rfid?maglock:key='+maglock_key)
     data = userURL.read()
     userURL.close()
   except:

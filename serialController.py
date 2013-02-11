@@ -5,11 +5,13 @@ import json
 import sys
 import os
 import random
+import threading
+import thread
+import urllib2
 import datetime
 import signal
 import time
 from subprocess import call
-import threading
 
 # Use of the velleman-vm110n board assumes that our sensor pin is using
 # digital input 1 and the maglock on digital output 1
@@ -23,6 +25,7 @@ if velleman:
 
 # This program runs from /etc/rc and takes keyboard input.
 
+door = "599main"
 serialport = '/dev/ttyUSB0'
 relayfile = None
 seconds_to_keep_door_open = 6
@@ -143,11 +146,14 @@ def logOpen(data):
   data['time'] = datetime.datetime.now().isoformat()
   f.write(json.dumps(data))
   f.close()
+  t = Thread(target=ThreadLog, args=(data,))
+  t.start()
 
 def openTheDoor():
   relayOff()
   time.sleep(seconds_to_keep_door_open)
   relayOn()
+
 
 def scanLoop():
   global day
@@ -171,13 +177,19 @@ def scanLoop():
     userData = getUsers()
     print "[DEBUG] Comparing to " + str(len(userData)) + " RFIDs..."
     foundUser = None
+    username = ""
+    status = "denied"
     for user in userData:
        if key == user['rfid_tag']:
           foundUser = user
+          username = foundUser['username']
+          status = "granted"
+    url = 'https://hackerdojo-signin.appspot.com/api/doorlog?door='+door+'&status='+status+'&rfid_tag='+key+'&username='+username
+    threading.Thread(target=urllib.urlopen, args=[url]).start()
     if foundUser:
       print '[FOUND] ' + foundUser['username']
       openTheDoor()
-      logOpen(foundUser)
+      #logOpen(foundUser)
       foundUser = None
     else:
       print '[NOTFOUND] Sorry, RFID key not found'
