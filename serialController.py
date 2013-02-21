@@ -11,6 +11,7 @@ import urllib2
 import datetime
 import signal
 import time
+from time import gmtime, strftime
 from subprocess import call
 
 # Use of the velleman-vm110n board assumes that our sensor pin is using
@@ -38,16 +39,16 @@ def interrupted(signum, frame):
   global day
   print '[interrupted!] '
   if signum == 14: #ALRM
-    print "[DAYTIME] Unlocking for day-time hours"
+    print strftime("%Y-%m-%d %H:%M:%S", gmtime())+" [DAYTIME] Unlocking for day-time hours"
     day = True
     relayOff()
   if signum == 2: #INT
-    print "[NIGHT] Locking up for after-hours"
+    print strftime("%Y-%m-%d %H:%M:%S", gmtime())+" [NIGHT] Locking up for after-hours"
     day = False
     relayOn()
 
 def relayOn():
-  print '[RELAYON] The door is now locked <red>'
+  print strftime("%Y-%m-%d %H:%M:%S", gmtime())+' [RELAYON] The door is now LOCKED'
   if insteon:
     os.system("insteon lobbyright off")
   if velleman:
@@ -63,7 +64,7 @@ def relayOn():
     #  print "Unexpected error:", sys.exc_info()[0]
 
 def relayOff():
-  print '[RELAYOFF] The door is now unlocked <white>'
+  print strftime("%Y-%m-%d %H:%M:%S", gmtime())+' [RELAYOFF] The door is now UNLOCKED'
   if insteon:
     os.system("insteon lobbyright on")
   if velleman:
@@ -127,13 +128,13 @@ def getUsers():
 
 def fatal(msg,err):
   print "\n"
-  print "[ERROR] " + str(msg)
-  print "[ERROR] " + str(err)
+  print strftime("%Y-%m-%d %H:%M:%S", gmtime())+" [ERROR] " + str(msg)
+  print strftime("%Y-%m-%d %H:%M:%S", gmtime())+" [ERROR] " + str(err)
   sys.exit(0)
 
 def main():
   global relayfile
-  print "\nHacker Dojo RFID Entry System v0.221\n"
+  print "\n"+strftime("%Y-%m-%d %H:%M:%S", gmtime())+" Hacker Dojo RFID Entry System v0.221\n"
   if serialrelay:
     relayfile = serial.Serial(serialport, baudrate=9600)
   relayOn() # Lock the door to start ;)
@@ -164,18 +165,28 @@ def scanLoop():
   else:
     mode = "night"
   try:
-    key = raw_input('RFID ('+mode+')> ').strip()
+    key = raw_input(strftime("%Y-%m-%d %H:%M:%S", gmtime())+' RFID ('+mode+')> ').strip()
   except:
     print ""
     key = ""
+  if key == "unlock":
+    print strftime("%Y-%m-%d %H:%M:%S", gmtime())+" [Overide] Unlocking"
+    day = True
+    relayOff()
+    key = ""
+  if key == "lock":
+    print strftime("%Y-%m-%d %H:%M:%S", gmtime())+" [Overide] Locking"
+    day = False
+    relayOn()
+    key = ""
   if key in ["exit","exit()","quit","quit()"]:
-    print "[EXIT] Exiting"
+    print strftime("%Y-%m-%d %H:%M:%S", gmtime())+" [EXIT] Exiting"
     sys.exit(0)
   # Only look at keys during the night
   if not day and key:
-    print "[DEBUG] I just scanned " + key
+    print strftime("%Y-%m-%d %H:%M:%S", gmtime())+" [DEBUG] I just scanned " + key
     userData = getUsers()
-    print "[DEBUG] Comparing to " + str(len(userData)) + " RFIDs..."
+    print strftime("%Y-%m-%d %H:%M:%S", gmtime())+" [DEBUG] Comparing to " + str(len(userData)) + " RFIDs..."
     foundUser = None
     username = ""
     status = "denied"
@@ -187,11 +198,11 @@ def scanLoop():
     url = 'https://hackerdojo-signin.appspot.com/api/doorlog?door='+door+'&status='+status+'&rfid_tag='+key+'&username='+username
     threading.Thread(target=urllib.urlopen, args=[url]).start()
     if foundUser:
-      print '[FOUND] ' + foundUser['username']
+      print strftime("%Y-%m-%d %H:%M:%S", gmtime())+' [FOUND] ' + foundUser['username']
       openTheDoor()
       #logOpen(foundUser)
       foundUser = None
     else:
-      print '[NOTFOUND] Sorry, RFID key not found'
+      print strftime("%Y-%m-%d %H:%M:%S", gmtime())+' [NOTFOUND] Sorry, RFID key not found'
 
 main()
