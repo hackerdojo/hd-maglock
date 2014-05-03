@@ -1,5 +1,5 @@
 # 59 minutes past the hour (every hour), cache a list of all the RFIDs locally
-59 * * * * /usr/local/bin/python /root/Serial-Relay-Controller/updater.py
+59 * * * * /usr/local/bin/python /opt/maglock/updater.py
 
 # Update the system clock once a day at 5:05AM
 5 5 * * * /usr/sbin/ntpdate pool.ntp.org > /dev/null &> /dev/null
@@ -11,4 +11,4 @@
 1 22 * * * /usr/bin/killall -INT python
 
 # Lock or unlock the door if an event is starting/ending right now(), during weekdays off hours
-0,15,30,45 0,1,2,3,4,5,6,7,22,23 * * * /usr/local/bin/python /root/Serial-Relay-Controller/event.py
+0,15,30,45 0,1,2,3,4,5,6,7,22,23 * * * /usr/local/bin/python /opt/maglock/event.py
