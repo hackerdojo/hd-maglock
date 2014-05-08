@@ -17,8 +17,8 @@ from subprocess import call
 # Use of the velleman-vm110n board assumes that our sensor pin is using
 # digital input 1 and the maglock on digital output 1
 velleman = False
-serialrelay = True 
-insteon = False 
+serialrelay = False 
+insteon = True
 
 if velleman:
   from pyk8055 import *
