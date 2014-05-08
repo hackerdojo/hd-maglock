@@ -110,7 +110,7 @@ checkDoorOpen()
 
 def getUsers():
   try:
-    userURL = urllib.urlopen('/root/rfid.keys')
+    userURL = urllib.urlopen('/opt/maglock/rfid.keys')
     data = userURL.read()
     userURL.close()
   except:
