@@ -13,9 +13,13 @@ import signal
 import time
 from time import gmtime, strftime
 from subprocess import call
+import rfidtag
 
 # Use of the velleman-vm110n board assumes that our sensor pin is using
 # digital input 1 and the maglock on digital output 1
+# *********************************************
+# 2014-05-09, velleman and serialrelay are obsolete, now using insteon devices
+# *********************************************
 velleman = False
 serialrelay = False 
 insteon = True
@@ -31,7 +35,9 @@ serialport = '/dev/ttyUSB0'
 relayfile = None
 seconds_to_keep_door_open = 6
 spooldir = '/root/unlock_spool'
-day = False
+hour = datetime.datetime.now().hour
+print hour
+day = (hour >= 8 and hour < 22)
 doorOpenAt = False
 audioPlayTime = int(time.time())
 
@@ -41,13 +47,13 @@ def interrupted(signum, frame):
   if signum == 14: #ALRM
     print strftime("%Y-%m-%d %H:%M:%S", gmtime())+" [DAYTIME] Unlocking for day-time hours"
     day = True
-    relayOff()
+    unlockTheDoor()
   if signum == 2: #INT
     print strftime("%Y-%m-%d %H:%M:%S", gmtime())+" [NIGHT] Locking up for after-hours"
     day = False
-    relayOn()
+    lockTheDoor()
 
-def relayOn():
+def lockTheDoor():
   print strftime("%Y-%m-%d %H:%M:%S", gmtime())+' [RELAYON] The door is now LOCKED'
   if insteon:
     os.system("insteon lobbyright off")
@@ -63,7 +69,7 @@ def relayOn():
     #except:
     #  print "Unexpected error:", sys.exc_info()[0]
 
-def relayOff():
+def unlockTheDoor():
   print strftime("%Y-%m-%d %H:%M:%S", gmtime())+' [RELAYOFF] The door is now UNLOCKED'
   if insteon:
     os.system("insteon lobbyright on")
@@ -133,13 +139,18 @@ def fatal(msg,err):
   sys.exit(0)
 
 def main():
+  device_file = rfidtag.get_rfid_device_file()
   global relayfile
   print "\n"+strftime("%Y-%m-%d %H:%M:%S", gmtime())+" Hacker Dojo RFID Entry System v0.221\n"
   if serialrelay:
     relayfile = serial.Serial(serialport, baudrate=9600)
-  relayOn() # Lock the door to start ;)
+# if it's during normal guest hours, open the door
+  if day:
+    unlockTheDoor()
+  else:
+    lockTheDoor()
   while True:
-    scanLoop()
+    scanLoop(device_file)
 
 def logOpen(data):
   rndfile = ''.join([random.choice('abcdefghijklmnoprstuvwyxzABCDEFGHIJKLMNOPRSTUVWXYZ') for i in range(15)])
@@ -151,12 +162,12 @@ def logOpen(data):
   t.start()
 
 def openTheDoor():
-  relayOff()
+  unlockTheDoor()
   time.sleep(seconds_to_keep_door_open)
-  relayOn()
+  lockTheDoor()
 
 
-def scanLoop():
+def scanLoop(dev_file):
   global day
   signal.signal(signal.SIGALRM, interrupted)
   signal.signal(signal.SIGINT, interrupted)
@@ -165,19 +176,21 @@ def scanLoop():
   else:
     mode = "night"
   try:
-    key = raw_input(strftime("%Y-%m-%d %H:%M:%S", gmtime())+' RFID ('+mode+')> ').strip()
+    #key = raw_input(strftime("%Y-%m-%d %H:%M:%S", gmtime())+' RFID ('+mode+')> ').strip()
+    key = rfidtag.get_tag(dev_file)
+    print key
   except:
     print ""
     key = ""
   if key == "unlock":
     print strftime("%Y-%m-%d %H:%M:%S", gmtime())+" [Overide] Unlocking"
     day = True
-    relayOff()
+    unlockTheDoor()
     key = ""
   if key == "lock":
     print strftime("%Y-%m-%d %H:%M:%S", gmtime())+" [Overide] Locking"
     day = False
-    relayOn()
+    lockTheDoor()
     key = ""
   if key in ["exit","exit()","quit","quit()"]:
     print strftime("%Y-%m-%d %H:%M:%S", gmtime())+" [EXIT] Exiting"
