@@ -7,10 +7,12 @@ import os
 import signal
 from time import gmtime, strftime
 
-# 2014-05-09; this program removed from cronjob as it fails
-#   see below comments for where it probably fails;
-#   we made a command decision to not fix it, as we don't really 
-#   need it.
+# 2014-05-09; this program removed from cronjob.
+#   It no longer works, and we no longer want it.
+#   See below comments for where it probably fails;
+#   the Executive Director made decision to not fix it, as we
+#   don't really want the door open after hours for non-members.
+
 # This program runs from a cronjob every 15 minutes
 
 from keys import maglock_key

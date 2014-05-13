@@ -1,9 +1,12 @@
 import os
 #!/usr/bin/env python
 
+# below is the string name of the USB device we want to read
+#   the rfid tags from 
 DEVICE_NAME="NewRoad Sem. NewRoad System PS2 Interface"
 
-# find which hidraw device the rfid reader is connected to
+# find how many hidraw devices are connected and then
+#   find which hidraw device the rfid reader is connected to
 def get_rfid_device_file():
 	numdevs = len(os.popen('ls /dev |grep hidraw').read().split("\n"))
 	for i in range(numdevs):

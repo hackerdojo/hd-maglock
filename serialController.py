@@ -19,10 +19,14 @@ import rfidtag
 # digital input 1 and the maglock on digital output 1
 # *********************************************
 # 2014-05-09, velleman and serialrelay are obsolete, now using insteon devices
+#   rfid tag is retrieved via rfidtag.py
 # *********************************************
+
+# this is the 3 possible methods to control the door, velleman & serialrelay are obsolete
 velleman = False
 serialrelay = False 
 insteon = True
+
 
 if velleman:
   from pyk8055 import *
