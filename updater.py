@@ -16,10 +16,10 @@ def fatal(msg,err):
 
 def main():
   try:
-    #userURL = urllib.urlopen('http://signup.hackerdojo.com/api/rfid?machine=599main&maglock:key='+maglock_key)
-    userURL = urllib.urlopen('http://signup.hackerdojo.com/api/rfid?maglock:key='+maglock_key)
-    data = userURL.read()
-    userURL.close()
+    base_url = 'http://signup.hackerdojo.com/api/v1/maglock/'
+    response = urllib.urlopen(base_url + maglock_key)
+    data = response.read()
+    response.close()
   except:
     fatal("Unable to connect to server",sys.exc_info()[0])
   try:
@@ -34,5 +34,5 @@ def main():
     FILE.close()
   except:
     fatal("Unable to write RFID data",sys.exc_info()[0])
-  
+
 main()
